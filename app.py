@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import pandas as pd
 import librosa
+import numpy as np
 
 st.set_page_config(page_title="riddim.exe · ⋆.˚✮🎧✮˚.⋆ · ", page_icon="🎵")
 
@@ -37,9 +38,10 @@ else:
 @st.cache_data(show_spinner=True)
 def extract_features(path):
     y, sr = librosa.load(path)
-    duration = librosa.get_duration(y=y, sr=sr)
+    duration = float(librosa.get_duration(y=y, sr=sr))
     tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
-    beat_count = len(beats)
+    tempo = float(np.squeeze(tempo))
+    beat_count = int(len(beats))
 
     zcr = librosa.feature.zero_crossing_rate(y)
     rms = librosa.feature.rms(y=y)
