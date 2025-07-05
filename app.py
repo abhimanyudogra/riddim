@@ -73,4 +73,27 @@ if st.button("Analyze"):
         data = extract_features(path)
     df = pd.DataFrame(data.items(), columns=["Feature", "Value"])
     st.subheader(f"Analysis for: {name}")
-    st.table(df)
+
+    FEATURE_DESCRIPTIONS = {
+        "Duration (s)": "Length of the track in seconds.",
+        "Tempo (BPM)": "Speed of the music in beats per minute.",
+        "Beat count": "Number of beats detected.",
+        "Avg RMS": "Average loudness of the audio.",
+        "Avg Zero Crossing Rate": "How often the signal changes sign; relates to noisiness.",
+        "Avg Spectral Centroid": "Represents brightness; higher means more treble.",
+        "Avg Spectral Bandwidth": "How spread out the frequencies are.",
+        "Avg Spectral Rolloff": "Frequency below which most energy lies.",
+        "Avg Spectral Flatness": "How noise-like versus tone-like the sound is.",
+        "Avg Spectral Contrast": "Difference between peaks and valleys in the spectrum.",
+    }
+    for i in range(10):
+        FEATURE_DESCRIPTIONS[f"MFCC {i+1}"] = "A coefficient describing the timbre."
+
+    df["Value"] = df["Value"].apply(lambda v: f"{v:.2f}")
+    df["Feature"] = df["Feature"].apply(
+        lambda f: f'<span title="{FEATURE_DESCRIPTIONS.get(f, '')}">{f}</span>'
+    )
+    st.write(
+        df.to_html(escape=False, index=False),
+        unsafe_allow_html=True,
+    )
