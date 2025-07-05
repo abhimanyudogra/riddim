@@ -4,6 +4,14 @@ import pandas as pd
 import librosa
 import numpy as np
 
+try:
+    import magenta.music as mm  # type: ignore
+    from magenta.models.music_vae import configs  # type: ignore
+    from magenta.models.music_vae.trained_model import TrainedModel  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    mm = None
+
+
 st.set_page_config(page_title="riddim.exe · ⋆.˚✮🎧✮˚.⋆ · ", page_icon="🎵")
 
 # Hide Streamlit style elements for a cleaner look
@@ -16,6 +24,23 @@ hide_style = """
 """
 
 st.markdown(hide_style, unsafe_allow_html=True)
+
+generate_style = """
+    <style>
+    .stButton>button {
+        background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+        color: white;
+        font-size: 1.5em;
+        padding: 0.75em 2em;
+        border-radius: 8px;
+        border: none;
+        width: 100%;
+    }
+    </style>
+"""
+
+st.markdown(generate_style, unsafe_allow_html=True)
+
 
 st.title("🎵 riddim.exe · ⋆.˚✮🎧✮˚.⋆ · ")
 
@@ -69,6 +94,26 @@ def extract_features(path):
         features[f"MFCC {i+1}"] = float(mfcc[i].mean())
     return features
 
+def generate_music(features, length_seconds=1800):
+    """Generate music using Magenta based on the extracted features."""
+    if mm is None:
+        st.warning("Magenta is not installed. Generation disabled.")
+        return None
+    try:
+        config = configs.CONFIG_MAP.get("cat-mel_2bar_big")
+        if not config:
+            st.error("Model configuration not found.")
+            return None
+        model = TrainedModel(config, batch_size=1, checkpoint_dir_or_path=None)
+        primer = mm.Seq()  # Placeholder primer
+        sequence = model.sample(n=1, length=length_seconds, primer_sequence=primer)[0]
+        audio = mm.sequence_proto_to_wav_data(sequence)
+        return audio
+    except Exception as exc:
+        st.error(f"Generation failed: {exc}")
+    return None
+
+
 
 if st.button("Analyze"):
     with st.spinner("Extracting features..."):
@@ -99,3 +144,10 @@ if st.button("Analyze"):
         df.to_html(escape=False, index=False),
         unsafe_allow_html=True,
     )
+
+if st.button("Generate"):
+    with st.spinner("Generating music... this may take a while"):
+        data = extract_features(path)
+        audio = generate_music(data)
+    if audio:
+        st.audio(audio, format="audio/wav")
