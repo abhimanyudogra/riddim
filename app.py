@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import librosa
 
-st.set_page_config(page_title="Music Feature Explorer", page_icon="🎵")
+st.set_page_config(page_title="riddim.exe · ⋆.˚✮🎧✮˚.⋆ · ", page_icon="🎵")
 
 # Hide Streamlit style elements for a cleaner look
 hide_style = """
@@ -16,7 +16,7 @@ hide_style = """
 
 st.markdown(hide_style, unsafe_allow_html=True)
 
-st.title("🎵 Music Feature Explorer")
+st.title("🎵 riddim.exe · ⋆.˚✮🎧✮˚.⋆ · ")
 
 st.write("Upload an audio file to analyze or use the default sample.")
 file = st.file_uploader("Upload MP3/WAV", type=["mp3", "wav"])
